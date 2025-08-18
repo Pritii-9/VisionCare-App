@@ -1,16 +1,20 @@
-from flask import Blueprint
-from backend.controllers.auth_controller import signup_controller, signin_controller, protected_data_controller
+# This file is a placeholder for authentication middleware.
+# For example, you could add functions here to verify JWT tokens
+# on protected routes.
 
-auth_bp = Blueprint('auth_bp', __name__)
-
-@auth_bp.route('/signup', methods=['POST'])
-def signup_route():
-    return signup_controller()
-
-@auth_bp.route('/signin', methods=['POST'])
-def signin_route():
-    return signin_controller()
-
-@auth_bp.route('/protected_data', methods=['GET'])
-def protected_data_route():
-    return protected_data_controller()
+def token_required(f):
+    """
+    A decorator function to ensure a valid token is present.
+    (This is just an example and is not currently used in the app.)
+    """
+    # @functools.wraps(f)
+    # def decorated(*args, **kwargs):
+    #     token = None
+    #     if 'x-access-token' in request.headers:
+    #         token = request.headers['x-access-token']
+    #     if not token:
+    #         return jsonify({'message': 'Token is missing!'}), 401
+    #     # ... token verification logic ...
+    #     return f(*args, **kwargs)
+    # return decorated
+    pass

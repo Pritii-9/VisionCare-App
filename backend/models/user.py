@@ -1,13 +1,15 @@
-from backend.__init__ import db
+# --- Mock User Database ---
+# In a real application, this would connect to a database (e.g., using SQLAlchemy).
+USERS = [
+    {'id': 'doc01', 'designation': 'Doctor', 'password': 'doc-pass-01'},
+    {'id': 'rec01', 'designation': 'Receptionist', 'password': 'rec-pass-01'},
+    {'id': 'scan01', 'designation': 'Scanner', 'password': 'scan-pass-01'}
+]
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(20), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(60), nullable=False)
-    role = db.Column(db.String(20), nullable=False)
-
-    def __repr__(self):
-        return f"User('{self.username}', '{self.role}')"
+def get_user(user_id, password):
+    """
+    Finds a user by their ID and password.
+    Returns the user object if found, otherwise None.
+    """
+    user = next((u for u in USERS if u['id'] == user_id and u['password'] == password), None)
+    return user

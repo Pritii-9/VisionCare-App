@@ -1,51 +1,29 @@
-from flask import jsonify, request
-from backend.__init__ import db, bcrypt
-from backend.models.user import User
+from flask import jsonify
+from models.user import get_user
 
-def signup_controller():
+def login_user(request):
+    """
+    Controller function to process the login request.
+    """
+    # Get the JSON data sent from the frontend
     data = request.get_json()
-    userId = data.get('userId')
-    name = data.get('name')
-    email = data.get('email')
-    password = data.get('password')
-    
-    # Automatically set the username and role
-    username = email  # Use email as the username
-    role = 'scanner'   # Hardcode the role to 'scanner'
-    
-    if not all([userId, name, email, password]):
-        return jsonify({'message': 'All fields are required'}), 400
 
-    existing_user = User.query.filter((User.userId == userId) | (User.username == username) | (User.email == email)).first()
-    if existing_user:
-        return jsonify({'message': 'User with this User ID, username, or email already exists'}), 409
+    if not data or not data.get('id') or not data.get('password'):
+        # Return an error if the request is missing data
+        return jsonify({'error': 'Missing ID or password'}), 400
 
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    
-    new_user = User(
-        userId=userId,
-        name=name,
-        username=username,
-        email=email,
-        password_hash=hashed_password,
-        role=role
-    )
-    db.session.add(new_user)
-    db.session.commit()
-
-    return jsonify({'message': 'User registered successfully'}), 201
-
-def signin_controller():
-    data = request.get_json()
-    username = data.get('username')
+    user_id = data.get('id')
     password = data.get('password')
 
-    user = User.query.filter_by(username=username).first()
+    # Use the model function to find the user
+    user = get_user(user_id, password)
 
-    if user and bcrypt.check_password_hash(user.password_hash, password):
-        return jsonify({'message': 'Login successful', 'role': user.role}), 200
-    
-    return jsonify({'message': 'Invalid username or password'}), 401
-
-def protected_data_controller():
-    return jsonify({'message': 'This is protected data'}), 200
+    if user:
+        # If a user is found, return a success response with the user's role
+        return jsonify({
+            'message': 'Login successful!',
+            'role': user['designation']
+        }), 200
+    else:
+        # If no user is found, return an error response
+        return jsonify({'error': 'Invalid ID or password'}), 401
