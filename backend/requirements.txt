@@ -2,3 +2,6 @@ Flask
 Flask-SQLAlchemy
 Flask-Cors
 Flask-Bcrypt
+pymongo[srv]
+python-dotenv
+Werkzeug

@@ -1,103 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext'; // CORRECTED PATH
+import { useAuth } from '../context/AuthContext';
+import Sidebar from '../components/sidebar'; // Corrected casing for consistency
+import Patients from '../pages/Patient'; // Import the new Patients page
+
+// --- Helper Components ---
+
+const UserProfile = () => (
+    <div className="flex items-center">
+        <div className="relative">
+            <input type="text" placeholder="Search" className="bg-gray-200 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none"/>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
+            </div>
+        </div>
+        <img className="h-10 w-10 rounded-full ml-4" src="https://placehold.co/100x100/F3F4F6/333333?text=U" alt="User" />
+    </div>
+);
+
+// --- Content Router Component ---
+// This component decides which page to display based on the activePage state.
+const MainContent: React.FC<{ activePage: string }> = ({ activePage }) => {
+  switch (activePage) {
+    case 'Patients':
+      return <Patients />;
+    case 'Dashboard':
+      return <DashboardContent />;
+    // Add cases for 'Appointments', 'Messages', 'Reports' here in the future
+    // For example: case 'Appointments': return <AppointmentsPage />;
+    default:
+      // Fallback to the main dashboard content
+      return <DashboardContent />;
+  }
+};
+
+// --- Main Dashboard Component ---
 
 const Dashboard: React.FC = () => {
-  // 1. Access authentication state from the context
-  const { role, logout } = useAuth();
-  const [protectedData, setProtectedData] = useState<string>('Loading sensitive data...');
-  const [error, setError] = useState<string | null>(null);
-
-  // 2. Fetch data from a protected backend route after the component mounts
-  useEffect(() => {
-    const fetchProtectedData = async () => {
-      try {
-        setError(null);
-        const response = await fetch('http://127.0.0.1:5000/api/protected_data', {
-          // 'include' is crucial for sending the session cookie from the browser to the server
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setProtectedData(data.message); // e.g., "Welcome back, Dr. Smith!"
-        } else if (response.status === 401) {
-          // Handle unauthorized access (e.g., session expired)
-          setError("Your session has expired. Please sign out and log in again.");
-          setProtectedData("Access Denied.");
-        } else {
-          // Handle other server errors
-          setError("The server encountered an error. Please try again later.");
-          setProtectedData("Failed to load data.");
-        }
-      } catch (err) {
-        console.error("Connection error:", err);
-        setError("Could not connect to the server. Please check your connection.");
-        setProtectedData("Failed to load data.");
-      }
-    };
-
-    fetchProtectedData();
-  }, []); // The empty array [] ensures this effect runs only once
-
-  // 3. A sub-component to render UI specific to the user's role
-  const RoleSpecificPanel = () => {
-    switch (role) {
-      case 'Doctor':
-        return (
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800">Doctor's Portal</h3>
-            <p className="text-gray-600 mt-1">Access patient records and diagnostic tools.</p>
-            {/* Add Doctor-specific components here */}
-          </div>
-        );
-      case 'Receptionist':
-        return (
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800">Receptionist View</h3>
-            <p className="text-gray-600 mt-1">Manage patient appointments and check-ins.</p>
-            {/* Add Receptionist-specific components here */}
-          </div>
-        );
-      case 'Scanner':
-        return (
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800">Scanner Interface</h3>
-            <p className="text-gray-600 mt-1">View and manage imaging scan queues.</p>
-            {/* Add Scanner-specific components here */}
-          </div>
-        );
-      default:
-        return <p className="text-gray-500">Your role does not have a specific dashboard view.</p>;
-    }
-  };
+  const { logout } = useAuth();
+  const [activePage, setActivePage] = useState('Patients'); // Default page is now 'Patients'
 
   return (
-    <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl text-center w-full max-w-xl">
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Welcome to the Dashboard</h1>
-      <p className="text-lg text-gray-600 mb-6">
-        Your Role: <strong className="font-semibold text-blue-600 capitalize">{role || 'User'}</strong>
-      </p>
+    <div className="flex h-screen bg-gray-50 font-sans">
+      
+      {/* --- Sidebar --- */}
+      <Sidebar 
+        activePage={activePage} 
+        setActivePage={setActivePage} 
+        logout={logout}
+      />
 
-      {/* Section for displaying data fetched from the protected API route */}
-      <div className="bg-gray-50 p-4 rounded-lg my-6 border border-gray-200">
-        <p className="text-gray-700 font-medium">{protectedData}</p>
-        {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
-      </div>
-
-      {/* Section for role-specific information and actions */}
-      <div className="border-t border-gray-200 pt-6 mt-6">
-        <RoleSpecificPanel />
-      </div>
-
-      {/* Logout Button */}
-      <button
-        onClick={logout}
-        className="mt-8 w-full py-3 px-4 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-300 transform hover:-translate-y-1"
-      >
-        Sign Out
-      </button>
+      {/* --- Main Content Area --- */}
+      <main className="flex-1 flex flex-col">
+        <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8">
+          <h2 className="text-3xl font-bold text-gray-800">{activePage}</h2>
+          <UserProfile />
+        </header>
+        
+        <div className="flex-1 p-8 overflow-y-auto">
+          {/* Use the MainContent component to render the correct page */}
+          <MainContent activePage={activePage} />
+        </div>
+      </main>
     </div>
   );
 };
+
+// --- Component for the main dashboard overview ---
+const DashboardContent: React.FC = () => {
+    const { role } = useAuth();
+    // You can keep data fetching here if needed for the main dashboard page
+    
+    return (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-semibold mb-4">Dashboard Overview</h3>
+            <p className="text-gray-700">
+                Welcome to your dashboard. Your role is: <strong className="font-semibold text-blue-600 capitalize">{role || 'User'}</strong>
+            </p>
+            <p className="mt-2 text-gray-600">Select a page from the sidebar to manage patients, appointments, and more.</p>
+        </div>
+    );
+}
 
 export default Dashboard;
