@@ -1,33 +1,34 @@
+from datetime import datetime
 from flask import current_app
-from bson import ObjectId
+
 
 class PatientModel:
     @staticmethod
-    def get_collection():
-        """Helper method to get the patients collection from the app context."""
+    def create(data):
         db = current_app.config["DATABASE"]
-        return db.patients
+        patient = {
+            "name": data.get("fullName"),              # ✅ match patients.py
+            "dob": data.get("dob"),
+            "gender": data.get("gender"),
+            "gestationalAge": data.get("gestationalAge"),
+            "birthWeight": data.get("birthWeight"),
+            "guardianName": data.get("guardianName"),
+            "contact": data.get("contactNumber"),      # ✅ match patients.py
+            "address": data.get("address"),
+            "medicalHistory": data.get("medicalHistory"),
+            "appointmentDate": data.get("appointmentDate"),
+            "appointmentTime": data.get("appointmentTime"),
+            "appointmentStatus": "Pending",
+            "createdAt": datetime.utcnow()
+        }
+        result = db.patients.insert_one(patient)
+        patient["_id"] = str(result.inserted_id)
+        return patient
 
     @staticmethod
     def get_all():
-        """Fetches all patients."""
-        collection = PatientModel.get_collection()
-        # Convert ObjectId to string for JSON serialization
-        patients = []
-        for patient in collection.find({}):
-            patient['_id'] = str(patient['_id'])
-            patients.append(patient)
+        db = current_app.config["DATABASE"]
+        patients = list(db.patients.find())
+        for p in patients:
+            p["_id"] = str(p["_id"])
         return patients
-
-    @staticmethod
-    def create(data):
-        """Creates a new patient."""
-        collection = PatientModel.get_collection()
-        
-        # Add default fields if they don't exist
-        from datetime import datetime
-        data['lastVisit'] = datetime.now().strftime("%Y-%m-%d")
-        data['status'] = 'Active'
-
-        result = collection.insert_one(data)
-        return {"message": "Patient added successfully", "patientId": str(result.inserted_id)}
