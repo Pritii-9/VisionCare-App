@@ -132,7 +132,7 @@ const App: React.FC = () => {
   const AuthContext = React.createContext({
     isAuthenticated: false,
     role: null,
-    login: (role: string) => {},
+    login: (_role: string) => {},
     logout: () => {},
   });
 
