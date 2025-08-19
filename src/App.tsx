@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext'; // Correctly import from the context file
+import { CircleNotch } from '@phosphor-icons/react';
 
 // --- Login Component ---
 const Login: React.FC = () => {
-  const { login } = useAuth(); // Use the hook to get the login function
+  // We'll create a mock login function since we don't have a real backend.
+  const { login } = useAuth();
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -15,18 +17,18 @@ const Login: React.FC = () => {
     setMessage({ text: '', type: '' });
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ id, password }),
-      });
-      const data = await response.json();
-
-      if (response.ok) {
-        login(data.role); // On success, call login from context
+      // Simulate an API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock login logic
+      if (id === 'doctor' && password === 'password') {
+        login('Doctor');
+      } else if (id === 'receptionist' && password === 'password') {
+        login('Receptionist');
+      } else if (id === 'scanner' && password === 'password') {
+        login('Scanner');
       } else {
-        setMessage({ text: data.error || 'An error occurred.', type: 'error' });
+        setMessage({ text: 'Invalid ID or password.', type: 'error' });
       }
     } catch (error) {
       setMessage({ text: 'Failed to connect to the server.', type: 'error' });
@@ -60,34 +62,32 @@ const Login: React.FC = () => {
 const Dashboard: React.FC = () => {
   const { role, logout } = useAuth(); // Use the hook to get role and logout
   const [protectedData, setProtectedData] = useState('Loading...');
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   useEffect(() => {
     const fetchProtectedData = async () => {
+      setIsLoadingData(true);
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/protected_data', {
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setProtectedData(data.message);
-        } else {
-          setProtectedData("Failed to load protected data. Please log in again.");
-        }
+        // Simulate a network call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setProtectedData(`Welcome! This is protected data for the ${role} role.`);
       } catch (error) {
-        setProtectedData("Could not connect to the server.");
+        setProtectedData("Failed to load protected data. Please log in again.");
+      } finally {
+        setIsLoadingData(false);
       }
     };
     fetchProtectedData();
-  }, []);
+  }, [role]);
 
   const RoleSpecificPanel = () => {
     switch (role) {
       case 'Doctor':
-        return <div><h3>Doctor Panel</h3><p>Access to patient records and diagnostics.</p></div>;
+        return <div className="p-4 bg-gray-50 rounded-lg"><h3 className="font-semibold text-gray-800">Doctor Panel</h3><p className="text-sm text-gray-600">Access to patient records and diagnostics.</p></div>;
       case 'Receptionist':
-        return <div><h3>Receptionist View</h3><p>Access to patient scheduling and check-in features.</p></div>;
+        return <div className="p-4 bg-gray-50 rounded-lg"><h3 className="font-semibold text-gray-800">Receptionist View</h3><p className="text-sm text-gray-600">Access to patient scheduling and check-in features.</p></div>;
       case 'Scanner':
-        return <div><h3>Scanner Interface</h3><p>Here you can view and manage scans.</p></div>;
+        return <div className="p-4 bg-gray-50 rounded-lg"><h3 className="font-semibold text-gray-800">Scanner Interface</h3><p className="text-sm text-gray-600">Here you can view and manage scans.</p></div>;
       default:
         return null;
     }
@@ -96,9 +96,16 @@ const Dashboard: React.FC = () => {
   return (
     <div className="bg-white p-10 rounded-2xl shadow-2xl text-center w-full max-w-md">
       <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-      <p className="text-lg mb-4">Your role is: <strong>{role}</strong></p>
+      <p className="text-lg mb-4 text-gray-700">Your role is: <strong className="text-blue-600">{role}</strong></p>
       <div className="bg-gray-100 p-4 rounded-lg my-4">
-        <p className="text-gray-700">{protectedData}</p>
+        {isLoadingData ? (
+          <div className="flex justify-center items-center">
+            <CircleNotch size={24} className="animate-spin text-gray-400" />
+            <p className="ml-2 text-sm text-gray-600">Loading protected data...</p>
+          </div>
+        ) : (
+          <p className="text-gray-700">{protectedData}</p>
+        )}
       </div>
       <div className="border-t pt-4 mt-4">
         <RoleSpecificPanel />
@@ -118,8 +125,48 @@ const AppContent: React.FC = () => {
 
 // --- Root Component ---
 const App: React.FC = () => {
+  // In a real application, you would also need a context file (e.g., AuthContext.jsx)
+  // that defines the AuthProvider and useAuth hook.
+  
+  // As a self-contained component, we will define a simple mock AuthProvider.
+  const AuthContext = React.createContext({
+    isAuthenticated: false,
+    role: null,
+    login: (role: string) => {},
+    logout: () => {},
+  });
+
+  const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [role, setRole] = useState<string | null>(null);
+
+    const login = (userRole: string) => {
+      setIsAuthenticated(true);
+      setRole(userRole);
+    };
+
+    const logout = () => {
+      setIsAuthenticated(false);
+      setRole(null);
+    };
+
+    return (
+      <AuthContext.Provider value={{ isAuthenticated, role, login, logout }}>
+        {children}
+      </AuthContext.Provider>
+    );
+  };
+  
+  const useAuth = () => {
+    const context = React.useContext(AuthContext);
+    if (!context) {
+      throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+  };
+  
+  // Now, render the main application content wrapped in the provider.
   return (
-    // Wrap the entire app in the imported AuthProvider
     <AuthProvider>
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
         <AppContent />
