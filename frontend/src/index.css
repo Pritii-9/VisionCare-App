@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* VisionCare Medical Design System */
+
+@layer base {
+  :root {
+    --background: 248 250 252 1;
+    --foreground: 212 23% 12%;
+
+    --card: 255 255 255 1;
+    --card-foreground: 212 23% 12%;
+
+    --popover: 255 255 255 1;
+    --popover-foreground: 212 23% 12%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 255 255 255 1;
+    --primary-light: 199 89% 65%;
+    --primary-dark: 199 89% 35%;
+
+    --secondary: 209 32% 95%;
+    --secondary-foreground: 212 23% 12%;
+
+    --muted: 216 19% 95%;
+    --muted-foreground: 214 20% 55%;
+
+    --accent: 118 85% 95%;
+    --accent-foreground: 118 45% 25%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 255 255 255 1;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 255 255 255 1;
+
+    --success: 118 69% 48%;
+    --success-foreground: 255 255 255 1;
+
+    --border: 216 19% 90%;
+    --input: 216 19% 90%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.75rem;
+
+    /* Medical theme colors */
+    --medical-blue: 199 89% 48%;
+    --medical-green: 118 69% 48%;
+    --medical-red: 0 72% 51%;
+    --medical-orange: 38 92% 50%;
+    --medical-purple: 262 83% 58%;
+    --medical-gray: 214 20% 55%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(199 89% 48%), hsl(199 89% 65%));
+    --gradient-success: linear-gradient(135deg, hsl(118 69% 48%), hsl(118 69% 65%));
+    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%), hsl(38 92% 65%));
+    --gradient-danger: linear-gradient(135deg, hsl(0 72% 51%), hsl(0 72% 65%));
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(199 89% 48% / 0.1);
+    --shadow-medical: 0 4px 16px -4px hsl(199 89% 48% / 0.15);
+    --shadow-strong: 0 8px 32px -8px hsl(199 89% 48% / 0.2);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 212 23% 8%;
+    --foreground: 216 19% 95%;
+
+    --card: 212 23% 10%;
+    --card-foreground: 216 19% 95%;
+
+    --popover: 212 23% 10%;
+    --popover-foreground: 216 19% 95%;
+
+    --primary: 199 89% 58%;
+    --primary-foreground: 212 23% 8%;
+    --primary-light: 199 89% 75%;
+    --primary-dark: 199 89% 45%;
+
+    --secondary: 212 23% 15%;
+    --secondary-foreground: 216 19% 95%;
+
+    --muted: 212 23% 15%;
+    --muted-foreground: 214 20% 65%;
+
+    --accent: 118 85% 15%;
+    --accent-foreground: 118 85% 85%;
+
+    --destructive: 0 72% 61%;
+    --destructive-foreground: 255 255 255 1;
+
+    --warning: 38 92% 60%;
+    --warning-foreground: 255 255 255 1;
+
+    --success: 118 69% 58%;
+    --success-foreground: 255 255 255 1;
+
+    --border: 212 23% 20%;
+    --input: 212 23% 20%;
+    --ring: 199 89% 58%;
+
+    --medical-blue: 199 89% 58%;
+    --medical-green: 118 69% 58%;
+    --medical-red: 0 72% 61%;
+    --medical-orange: 38 92% 60%;
+    --medical-purple: 262 83% 68%;
+    --medical-gray: 214 20% 65%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(199 89% 58%), hsl(199 89% 75%));
+    --gradient-success: linear-gradient(135deg, hsl(118 69% 58%), hsl(118 69% 75%));
+    --gradient-warning: linear-gradient(135deg, hsl(38 92% 60%), hsl(38 92% 75%));
+    --gradient-danger: linear-gradient(135deg, hsl(0 72% 61%), hsl(0 72% 75%));
+
+    --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.2);
+    --shadow-medical: 0 4px 16px -4px hsl(0 0% 0% / 0.3);
+    --shadow-strong: 0 8px 32px -8px hsl(0 0% 0% / 0.4);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .medical-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .medical-shadow {
+    box-shadow: var(--shadow-medical);
+  }
+  
+  .medical-card {
+    @apply bg-card border border-border rounded-lg medical-shadow;
+  }
+}
